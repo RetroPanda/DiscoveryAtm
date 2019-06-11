@@ -1,6 +1,0 @@
-package com.discovery.bank.model;
-
-public class DenominationModel {
-	private int id;
-	private int count;
-}

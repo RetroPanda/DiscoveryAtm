@@ -1,9 +1,0 @@
-package com.discovery.bank.exception;
-
-public class RemainderException extends RuntimeException {
-
-	public RemainderException(String string) {
-		// TODO Auto-generated constructor stub
-	}
-
-}

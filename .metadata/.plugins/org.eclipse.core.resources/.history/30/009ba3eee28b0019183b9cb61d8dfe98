@@ -1,5 +1,0 @@
-package com.discovery.bank.exception;
-
-public class RemainderException extends Exception {
-
-}

@@ -1,6 +1,0 @@
-﻿INSERT INTO ACCOUNT_TYPE VALUES ('CHQ', 'Cheque Account', 1);
-INSERT INTO ACCOUNT_TYPE VALUES ('SVGS', 'Savings Account', 1);
-INSERT INTO ACCOUNT_TYPE VALUES ('PLOAN', 'Personal Loan Account', 0);
-INSERT INTO ACCOUNT_TYPE VALUES ('HLOAN', 'Home Loan Account', 0);
-INSERT INTO ACCOUNT_TYPE VALUES ('CCRD', 'Credit Card', 1);
-INSERT INTO ACCOUNT_TYPE VALUES ('CFCA', 'Customer Foreign Currency Account', 0);
