@@ -1,0 +1,16 @@
+package com.discovery.bank.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.discovery.bank.repo.AtmRepository;
+
+public class AtmService {
+	@Autowired
+	AtmRepository repository;
+	
+	public void getAllAccounts() {
+		repository.findAll().forEach((account) -> System.out.println("ACOUUNT IS "+ account.getAccountNumber()));	
+	       
+	}
+
+}

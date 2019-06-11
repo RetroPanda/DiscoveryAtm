@@ -1,0 +1,5 @@
+package com.discovery.bank.service;
+
+public class AtmService {
+
+}

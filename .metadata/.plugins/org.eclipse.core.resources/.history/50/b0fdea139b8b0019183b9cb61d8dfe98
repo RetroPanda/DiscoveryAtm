@@ -1,0 +1,11 @@
+package com.discovery.bank.repo;
+
+import java.util.List;
+import org.springframework.data.repository.CrudRepository;
+
+import com.discovery.bank.dto.ClientAccount;
+import com.discovery.bank.dto.Currency;
+
+public interface CurrencyRepository extends CrudRepository<Currency, Integer> {
+	Currency findByCurrencyCode(int id);
+}

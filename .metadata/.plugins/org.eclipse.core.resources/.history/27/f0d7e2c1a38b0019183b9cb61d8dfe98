@@ -1,0 +1,23 @@
+package com.discovery.bank.dto;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class AtmAllocation {
+	@Id
+	@Column(name = "ATM_ALLOCATION_ID ")
+	private int atmAllocationId;
+
+	@Column(name = "ATM_ID")
+	private int atmId;
+
+	@Column(name = "DENOMINATION_ID ")
+	private String denominationId;
+	
+	@Column(name = "COUNT ")
+	private String count;
+
+	
+}

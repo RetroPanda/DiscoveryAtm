@@ -1,0 +1,27 @@
+package com.discovery.bank.dto;
+
+import java.math.BigDecimal;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class Currency {
+	@Id 
+	@Column(name = "CLIENT_ID")
+	private int clientId;
+	  
+	@Column(name = "CLIENT_ACCOUNT_NUMBER")
+	private String clientAccountNumber;
+	  
+	@Column(name = "ACCOUNT_TYPE_CODE")
+	private String accountTypeCode;
+	
+	@Column(name = "CURRENCY_CODE")
+	private String currencyCode;
+	  
+	@Column(name = "DISPLAY_BALANCE")
+	private BigDecimal displayBalance;
+	
+}

@@ -1,0 +1,18 @@
+package com.discovery.bank.repo;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
+import com.discovery.bank.model.ClientAccount;
+
+public interface AtmRepository extends CrudRepository<ClientAccount, Integer> {
+	@Query("SELECT a FROM CLIENT_ACCOUNT WHERE a.client_Id=:client_Id")
+	List<ClientAccount> findByClientId(@Param("client_Id") int id);
+	
+//	List<ClientAccount> fetchArticles(, @Param("category") String category);
+
+//	List<ClientAccount> (String code);
+}

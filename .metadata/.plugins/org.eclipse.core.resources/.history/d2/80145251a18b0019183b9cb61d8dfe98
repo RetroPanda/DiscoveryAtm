@@ -1,0 +1,18 @@
+package com.discovery.bank.dto;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class Currency {
+	@Id
+	private String currencyCode;
+
+	@Column(nullable = false)
+	private int decimalPlaces;
+
+	@Column(nullable = false)
+	private String description;
+	
+}

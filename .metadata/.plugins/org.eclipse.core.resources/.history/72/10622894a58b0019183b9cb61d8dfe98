@@ -1,0 +1,158 @@
+package com.discovery.bank.service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.discovery.bank.dto.AccountType;
+import com.discovery.bank.dto.AtmAllocation;
+import com.discovery.bank.dto.ClientAccount;
+import com.discovery.bank.dto.Currency;
+import com.discovery.bank.dto.CurrencyConversionRate;
+import com.discovery.bank.dto.Denomination;
+import com.discovery.bank.model.ClientAccountModel;
+import com.discovery.bank.repo.AccountRepository;
+import com.discovery.bank.repo.AccountTypeRepository;
+import com.discovery.bank.repo.AtmAllocationRepository;
+import com.discovery.bank.repo.ConversionRateRepository;
+import com.discovery.bank.repo.CurrencyRepository;
+import com.discovery.bank.repo.DenominationRepository;
+
+@Service
+public class AtmService {
+	@Autowired
+	AccountRepository accRepository;
+	
+	@Autowired
+	CurrencyRepository currencyRepository;
+	
+	@Autowired
+	ConversionRateRepository conversionRateRepository;
+	
+	@Autowired
+	AccountTypeRepository accTypeRepository;
+	
+	@Autowired
+	AtmAllocationRepository atmAllocationRepository;
+	
+	@Autowired
+	DenominationRepository denominationRepository;
+	
+	public void withdraw(int accNumber, int amount, int atmId) {
+		ClientAccount account = accRepository.findById(accNumber).get();
+	
+		BigDecimal balance = account.getDisplayBalance();
+		if(balance.subtract(BigDecimal.valueOf(accNumber)).intValue() < 0){
+//			throw new InsufficentFundsError();
+		}
+		Double nextLowest=0.00;
+		if(amount % 10 == 0){
+			nextLowest=Math.floor(amount);
+		}else {
+//			throw new InsufficentNotesError(nextLowest);
+		}
+		List<AtmAllocation> atms = new ArrayList<>();
+		atmAllocationRepository.findByAtmId(atmId).forEach((atm)->atms.add(atm));
+		for(AtmAllocation atm : atms) {	
+			Denomination denomination = denominationRepository.findById(atm.getDenominationId()).get();
+		
+//		
+		}
+		//atm.get
+//		denomination.setValue(BigDecimal.valueOf(50));
+//		List<Denomination> denominations = new ArrayList<>();
+//
+//		switch (denomination.getValue().intValue()) {
+//			
+//			case 200:	;
+//			break;
+//
+//			case 100:;
+//			break;
+//
+//			case 50:;
+//			break;
+//
+//			case 20:;
+//			break;
+//			
+//			case 10:;
+//				break;
+//			
+//		}
+//		//rememebr to deduct amount of notes left from db
+//		
+//		account.setDisplayBalance(account.getDisplayBalance().subtract(request.getAmount()));
+//		
+////		Denomination denomination = new Denomination();
+////		denomination.setValue(BigDecimal.valueOf(50));
+////		denomination.setDenominationId(1234);
+////		denominations.add(denomination);
+//		return denominations;
+	}
+
+	public List<ClientAccountModel> getCurrencyAccountsByClientId(int id) {
+		List<ClientAccount> accounts = new ArrayList<ClientAccount>();
+		List<ClientAccountModel> accountsToReturn = new ArrayList<ClientAccountModel>();
+		
+		accRepository.findByClientId(id).forEach((account) -> accounts.add(account));
+		
+		for(ClientAccount account : accounts) {
+			ClientAccountModel clientAccountModel = new ClientAccountModel();
+			Currency curr = currencyRepository.findById(account.getCurrencyCode()).get();
+			CurrencyConversionRate conversionRate = conversionRateRepository.findById(account.getCurrencyCode()).get();
+			clientAccountModel.setAccountNumber(account.getClientAccountNumber());
+			clientAccountModel.setAccountBalance(account.getDisplayBalance().doubleValue());
+			clientAccountModel.setCurrency(account.getCurrencyCode());
+			clientAccountModel.setConversionRate(conversionRate.getRate());
+			clientAccountModel.setAccountConvertedBalance(convert(account.getDisplayBalance(), conversionRate.getRate(), curr.getDecimalPlaces(), conversionRate.getConversionIndicator()).doubleValue());
+			accountsToReturn.add(clientAccountModel);
+		}
+		accountsToReturn.sort(new Comparator<ClientAccountModel>() {
+            @Override
+            public int compare(ClientAccountModel account1, ClientAccountModel account2) {
+            	return account1.getAccountBalance().compareTo(account2.getAccountBalance());
+             }
+        });
+		return accountsToReturn;
+	}
+	
+	public List<ClientAccountModel> getTransactionalAccountsByClientId(int id) {
+		
+		List<ClientAccount> accounts = new ArrayList<ClientAccount>();
+		List<ClientAccountModel> accountsToReturn = new ArrayList<ClientAccountModel>();
+		//TODO get properly
+		accRepository.findByClientId(id).forEach((account) -> accounts.add(account));
+		
+		for(ClientAccount account : accounts) {
+			ClientAccountModel clientAccountModel = new ClientAccountModel();
+			AccountType accType = accTypeRepository.findById(account.getAccountTypeCode()).get();
+			clientAccountModel.setAccountNumber(account.getClientAccountNumber());
+			clientAccountModel.setAccountBalance(account.getDisplayBalance().doubleValue());
+			clientAccountModel.setAccountType(accType.getDesciption());
+			accountsToReturn.add(clientAccountModel);
+		}
+		accountsToReturn.sort(new Comparator<ClientAccountModel>() {
+            @Override
+            public int compare(ClientAccountModel account1, ClientAccountModel account2) {
+            	return account1.getAccountBalance().compareTo(account2.getAccountBalance());
+             }
+        });
+		return accountsToReturn;
+	}
+	
+	private BigDecimal convert(BigDecimal amount, BigDecimal conversionRate, int decimalPlaces, String indicator) {
+		String str = indicator.trim();
+		BigDecimal converted = null;
+		if(str.equals("*")){
+			converted = amount.multiply(conversionRate);
+		} else if(str.equals("/")){
+			converted = amount.divide(conversionRate);
+		}
+		return converted;
+	}
+}

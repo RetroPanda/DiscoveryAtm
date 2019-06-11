@@ -1,0 +1,5 @@
+package com.discovery.bank.exception;
+
+public class InsufficentFundsException extends Exception {
+
+}

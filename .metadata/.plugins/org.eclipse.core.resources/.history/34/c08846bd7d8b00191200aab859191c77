@@ -1,0 +1,5 @@
+package com.discovery.bank.controller;
+
+public class AtmController {
+
+}

@@ -1,0 +1,12 @@
+package com.discovery.bank.controller;
+
+import org.springframework.ui.Model;
+
+public class AtmController {
+	@RequestMapping("/")
+    public String homePage(Model model) { 	
+    //	model.addAttribute("name", name);
+        model.addAttribute("appName", "ELLO ");
+        return "home";
+    }
+}

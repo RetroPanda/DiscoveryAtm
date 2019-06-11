@@ -1,0 +1,2 @@
+﻿INSERT INTO ACCOUNT_TYPE VALUES ('CHQ', 'Cheque Account', 1);
+

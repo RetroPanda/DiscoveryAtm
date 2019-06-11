@@ -1,0 +1,4 @@
+﻿insert into country (name) VALUES ('India');
+insert into country (name) VALUES ('Brazil');
+insert into country (name) VALUES ('USA');
+insert into country (name) VALUES ('Italy');

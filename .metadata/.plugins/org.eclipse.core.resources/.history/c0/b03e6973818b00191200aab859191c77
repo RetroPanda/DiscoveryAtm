@@ -1,0 +1,14 @@
+package com.discovery.bank.model;
+
+@Entity
+public class Country {
+ 
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    private Integer id;
+     
+    @Column(nullable = false)
+    private String name;
+ 
+    //...
+}

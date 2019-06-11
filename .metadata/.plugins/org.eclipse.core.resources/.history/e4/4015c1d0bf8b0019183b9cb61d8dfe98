@@ -1,0 +1,22 @@
+<html xmlns:th="http://www.thymeleaf.org">
+	<head><title>Home Page</title></head>
+	<body>
+		<h1>Hello !</h1>
+			<table class="table">
+		  <thead>
+		    <tr>
+		      <th scope="col">Account Number</th>
+		      <th scope="col">Account Type</th>
+		      <th scope="col">Account Balance</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		   <tr th:each="account : ${accounts}">
+            <td><span th:text="${account.accountNumber}"> number </span></td>
+            <td><span th:text="${account.accountType}"> type </span></td>
+            <td>R <span th:text="${account.accountBalance}"> balance </span></td>
+      	  </tr>
+		  </tbody>
+		</table>
+	</body>
+</html>

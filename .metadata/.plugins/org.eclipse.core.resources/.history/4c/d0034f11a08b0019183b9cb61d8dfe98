@@ -1,0 +1,29 @@
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>Transactional</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	</head>
+	<body>
+	<h1>Transactional Balances</h1>
+		<table class="table">
+		  <thead>
+		    <tr>
+		      <th scope="col">Account Number</th>
+		      <th scope="col">Currency</th>
+		      <th scope="col">Currency Balance</th>
+		      <th scope="col">Conversion Rate</th>
+		      <th scope="col">ZAR Amount</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		   <tr th:each="account : ${accounts}">
+            <td><span th:text="${account.accountNumber}"> number </span></td>
+            <td><span th:text="${account.accountBalance}"> balance </span></td>
+            <td><span th:text="${account.accountBalance}"> balance </span></td>
+            <td><span th:text="${account.accountType}"> type </span></td>
+            <td>R <span th:text="${account.accountConvertedBalance}"> balance </span></td>
+      	  </tr>
+		  </tbody>
+		</table>
+	</body>
+</html>
