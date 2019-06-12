@@ -17,6 +17,10 @@ import com.discovery.bank.dto.ClientAccount;
 import com.discovery.bank.dto.Currency;
 import com.discovery.bank.dto.CurrencyConversionRate;
 import com.discovery.bank.dto.Denomination;
+import com.discovery.bank.exception.AccountNotFoundException;
+import com.discovery.bank.exception.AtmNotFoundException;
+import com.discovery.bank.exception.InsufficentFundsException;
+import com.discovery.bank.exception.RemainderException;
 import com.discovery.bank.model.ClientAccountModel;
 import com.discovery.bank.model.DenominationModel;
 import com.discovery.bank.repo.AccountRepository;
@@ -46,21 +50,22 @@ public class AtmService {
 	@Autowired
 	DenominationRepository denominationRepository;
 	
-	public List<DenominationModel> withdraw(String accNumber, int amount, int atmId) {
+	public List<DenominationModel> withdraw(String accNumber, int amount, int atmId) throws RemainderException {
 		ClientAccount account = accRepository.findByClientAccountNumber(accNumber).get();
 	
 		BigDecimal balance = account.getDisplayBalance();
 		if(balance.subtract(BigDecimal.valueOf(amount)).intValue() < 0){
-//			throw new InsufficentFundsError();
+			throw new InsufficentFundsException();
 		}
-		Double nextLowest=0.00;
-		if(amount % 10 == 0){
-			nextLowest=Math.floor(amount);
-		}else {
-//			throw new InsufficentNotesError(nextLowest);
+		
+		if(amount % 10 != 0){		
+			throw new RemainderException(amount - (amount % 10));
 		}
 		List<AtmAllocation> atms = new ArrayList<>();
 		atmAllocationRepository.findByAtmId(atmId).forEach((atm) -> atms.add(atm));
+		if(atms.size()<=0) {
+			throw new AtmNotFoundException();
+		}
 		
 		//get denominationsIds in order
 		ArrayList<Integer> notes = new ArrayList<Integer>();
@@ -89,15 +94,14 @@ public class AtmService {
 				counts.add(i+1,0);
 				counts.remove(i);
 			}
-			if(requested!=0) {
-			//	throw new RemainderException("Can only withdraw " + (amount-requested));
-				break;
-			}
+		}
+		if(requested!=0) {
+				throw new RemainderException(amount-requested);
 		}
 			
 		//Adjust account balance
 		account.setDisplayBalance(account.getDisplayBalance().subtract(BigDecimal.valueOf(amount)));
-		//accRepository.save(account);
+		accRepository.save(account);
 		List<DenominationModel> denominations = new ArrayList<>();
 		for(int i = 0;i<counts.size();i++) {
 			DenominationModel denomination = new DenominationModel();
@@ -109,8 +113,8 @@ public class AtmService {
 		//Deduct notes dispensed from ATM count
 		for(DenominationModel denomiation : denominations) {	
 			AtmAllocation atm = atmAllocationRepository.findByAtmIdAndDenominationId(atmId, denomiation.getId()).get();
-			atm.setCount(atm.getCount()-denomiation.getCount());
-			//atmAllocationRepository.save(atm);
+			atm.setCount(denomiation.getCount());
+			atmAllocationRepository.save(atm);
 		}
 		
 		return denominations;
@@ -120,6 +124,9 @@ public class AtmService {
 		List<ClientAccount> accounts = new ArrayList<ClientAccount>();
 		List<ClientAccountModel> accountsToReturn = new ArrayList<ClientAccountModel>();
 		accRepository.findByClientId(id).forEach((account) -> accounts.add(account));
+		if(accounts.size()<=0) {
+			throw new AccountNotFoundException();
+		}
 		
 		for(ClientAccount account : accounts) {
 			ClientAccountModel clientAccountModel = new ClientAccountModel();
@@ -146,7 +153,9 @@ public class AtmService {
 		List<ClientAccount> accounts = new ArrayList<ClientAccount>();
 		List<ClientAccountModel> accountsToReturn = new ArrayList<ClientAccountModel>();
 		accRepository.findByClientId(id).forEach((account) -> accounts.add(account));
-		
+		if(accounts.size()<=0) {
+			throw new AccountNotFoundException();
+		}
 		for(ClientAccount account : accounts) {
 			ClientAccountModel clientAccountModel = new ClientAccountModel();
 			AccountType accType = accTypeRepository.findById(account.getAccountTypeCode()).get();

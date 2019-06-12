@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.discovery.bank.dto.ClientAccount;
+import com.discovery.bank.exception.RemainderException;
 import com.discovery.bank.model.ClientAccountModel;
 import com.discovery.bank.model.DenominationModel;
 import com.discovery.bank.repo.AccountRepository;
@@ -20,13 +21,6 @@ public class AtmController {
 	
 	@Autowired
 	AtmService atmService;
-	
-	@RequestMapping("/")
-    public String homePage(Model model) { 	
-    //	model.addAttribute("name", name);
-        model.addAttribute("appName", "ELLO ");
-        return "home";
-    }
 
 	@RequestMapping("/accounts/transactional")
     public String getTransactionalAccounts(@RequestParam int id, Model model) { 	
@@ -44,8 +38,7 @@ public class AtmController {
     }
 
 	@RequestMapping("/withdraw")
-	//@ResponseBody
-    public String getAccounts(@RequestParam String accNumber,@RequestParam int amount,@RequestParam int atmId,Model model) { 	
+    public String getAccounts(@RequestParam String accNumber,@RequestParam int amount,@RequestParam int atmId,Model model) throws RemainderException { 	
   
 		List<DenominationModel> denominations = atmService.withdraw(accNumber, amount, atmId);
 		model.addAttribute("denominations", denominations);
