@@ -74,6 +74,7 @@ public class AtmService {
 		notes.add(50);
 		notes.add(20);
 		notes.add(10);
+		
 		ArrayList<Integer> denominationIds = new ArrayList<Integer>();
 		for(int i = 0;i<notes.size();i++) {
 			denominationIds.add(denominationRepository.findByValue(BigDecimal.valueOf(notes.get(i))).get().getDenominationId());
@@ -81,6 +82,11 @@ public class AtmService {
 		ArrayList<Integer> counts = new ArrayList<Integer>();
 		for(int i = 0;i<denominationIds.size();i++) {
 			counts.add(calculateCountForDenomination(atmId, denominationIds.get(i)));
+		}
+		
+		ArrayList<Integer> originalCounts = new ArrayList<Integer>();
+		for(int i = 0;i<counts.size();i++) {
+			originalCounts.add(counts.get(i));
 		}
 		int requested = amount;
 		for(int i = 0;i<notes.size();i++) {
@@ -95,8 +101,13 @@ public class AtmService {
 				counts.remove(i);
 			}
 		}
+
 		if(requested!=0) {
+			if(amount-requested==0) {
+				throw new InsufficentFundsException("ATM is out of notes");
+			}else {				
 				throw new RemainderException(amount-requested);
+			}
 		}
 			
 		//Adjust account balance
@@ -105,15 +116,17 @@ public class AtmService {
 		List<DenominationModel> denominations = new ArrayList<>();
 		for(int i = 0;i<counts.size();i++) {
 			DenominationModel denomination = new DenominationModel();
-			denomination.setCount(counts.get(i));
-			denomination.setId(denominationIds.get(i));
+			denomination.setDenominationValue(notes.get(i));
+			denomination.setNumberOfNotesLeft(counts.get(i));
+			denomination.setNumberOfNotesToDispense(originalCounts.get(i)-counts.get(i));
+			denomination.setDenominationId(denominationIds.get(i));
 			denominations.add(denomination);
 		}
 		
 		//Deduct notes dispensed from ATM count
 		for(DenominationModel denomiation : denominations) {	
-			AtmAllocation atm = atmAllocationRepository.findByAtmIdAndDenominationId(atmId, denomiation.getId()).get();
-			atm.setCount(denomiation.getCount());
+			AtmAllocation atm = atmAllocationRepository.findByAtmIdAndDenominationId(atmId, denomiation.getDenominationId()).get();
+			atm.setCount(denomiation.getNumberOfNotesLeft());
 			atmAllocationRepository.save(atm);
 		}
 		
@@ -123,7 +136,7 @@ public class AtmService {
 	public List<ClientAccountModel> getCurrencyAccountsByClientId(int id) {
 		List<ClientAccount> accounts = new ArrayList<ClientAccount>();
 		List<ClientAccountModel> accountsToReturn = new ArrayList<ClientAccountModel>();
-		accRepository.findByClientId(id).forEach((account) -> accounts.add(account));
+		accRepository.findByClientIdAndAccountTypeCode(id, "CFCA").forEach((account) -> accounts.add(account));
 		if(accounts.size()<=0) {
 			throw new AccountNotFoundException();
 		}
@@ -142,7 +155,7 @@ public class AtmService {
 		accountsToReturn.sort(new Comparator<ClientAccountModel>() {
             @Override
             public int compare(ClientAccountModel account1, ClientAccountModel account2) {
-            	return account1.getAccountBalance().compareTo(account2.getAccountBalance());
+            	return account2.getAccountConvertedBalance().compareTo(account1.getAccountConvertedBalance());
              }
         });
 		return accountsToReturn;
@@ -152,7 +165,10 @@ public class AtmService {
 		
 		List<ClientAccount> accounts = new ArrayList<ClientAccount>();
 		List<ClientAccountModel> accountsToReturn = new ArrayList<ClientAccountModel>();
-		accRepository.findByClientId(id).forEach((account) -> accounts.add(account));
+		accRepository.findByClientIdAndAccountTypeCode(id, "SVGS").forEach((account) -> accounts.add(account));
+		accRepository.findByClientIdAndAccountTypeCode(id, "CHQ").forEach((account) -> accounts.add(account));
+		accRepository.findByClientIdAndAccountTypeCode(id, "CCRD").forEach((account) -> accounts.add(account));
+
 		if(accounts.size()<=0) {
 			throw new AccountNotFoundException();
 		}
@@ -167,7 +183,7 @@ public class AtmService {
 		accountsToReturn.sort(new Comparator<ClientAccountModel>() {
             @Override
             public int compare(ClientAccountModel account1, ClientAccountModel account2) {
-            	return account1.getAccountBalance().compareTo(account2.getAccountBalance());
+            	return account2.getAccountBalance().compareTo(account1.getAccountBalance());
              }
         });
 		return accountsToReturn;
@@ -177,9 +193,9 @@ public class AtmService {
 		String str = indicator.trim();
 		BigDecimal converted = null;
 		if(str.equals("*")){
-			converted = amount.multiply(conversionRate);
+			converted = amount.multiply(conversionRate).setScale(decimalPlaces, RoundingMode.HALF_UP);;
 		} else if(str.equals("/")){
-			converted = amount.divide(conversionRate, RoundingMode.HALF_UP);
+			converted = amount.divide(conversionRate,decimalPlaces, RoundingMode.HALF_UP);
 		}
 		return converted;
 	}

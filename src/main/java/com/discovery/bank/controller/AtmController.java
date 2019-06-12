@@ -37,11 +37,4 @@ public class AtmController {
 		 return "currency";
     }
 
-	@RequestMapping("/withdraw")
-    public String getAccounts(@RequestParam String accNumber,@RequestParam int amount,@RequestParam int atmId,Model model) throws RemainderException { 	
-  
-		List<DenominationModel> denominations = atmService.withdraw(accNumber, amount, atmId);
-		model.addAttribute("denominations", denominations);
-		 return "withdraw";
-    }
 }

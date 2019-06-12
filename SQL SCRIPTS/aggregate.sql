@@ -1,16 +1,29 @@
-SELECT CONCAT( Client.title,' ',Client.name, ' ', Client.surname) AS Client,  SUM(Client_Account.display_balance) AS Net_Position  FROM Client_Account 
-INNER JOIN Client
-               ON Client_Account.client_Id=Client.client_Id
-WHERE Client_Account.client_Id IN ( SELECT Client.client_id FROM Client) GROUP BY Client_Account.client_Id;
-
-SELECT CONCAT( Client.title,' ',Client.name, ' ', Client.surname) AS Client, SUM(Client_Account.display_balance) AS Loan_Balance  FROM Client_Account 
-INNER JOIN Client
-               ON Client_Account.client_Id=Client.client_Id
-WHERE Client_Account.client_Id IN ( SELECT Client.client_id FROM Client) AND Client_Account.account_type_code LIKE '%LOAN'  GROUP BY Client_Account.client_Id;
-
-SELECT CONCAT( Client.title,' ',Client.name, ' ', Client.surname) AS Client, SUM(Client_Account.display_balance) AS Transactional_Balance FROM Client_Account
-INNER JOIN Client
-               ON Client_Account.client_Id=Client.client_Id
-INNER JOIN Account_Type
-               ON Client_Account.account_type_code=Account_Type.account_type_code
-WHERE Client_Account.client_Id IN ( SELECT Client.client_id FROM Client) AND Account_Type.transactional = 'TRUE' GROUP BY Client_Account.client_Id; 
+SELECT CONCAT(client.title, ' ', client.name , ' ' , client.surname) "Client", c.transactional AS "Transactional Balance", c.loan AS "Loan Balance", c.transactional + c.loan AS "Net Position"
+FROM client
+RIGHT JOIN (
+	SELECT a.client_id AS client_id, a.balance AS transactional, b.balance AS loan
+	FROM(
+		SELECT client.client_id, SUM(client_account.display_balance) AS balance
+		FROM Client
+		INNER JOIN client_account 
+               	ON client.client_id = client_account.client_id
+		INNER JOIN account_type 
+                ON client_account.account_type_code = account_type.account_type_code
+		WHERE account_type.transactional = true
+		GROUP BY client.client_id 
+	) a
+	LEFT JOIN(
+		SELECT client.client_id, SUM(client_account.display_balance) AS balance
+		FROM Client
+		INNER JOIN client_account 
+                ON client.client_id = client_account.client_id
+		INNER JOIN account_type 
+                ON client_account.account_type_code = account_type.account_type_code
+		WHERE account_type.transactional = false
+		AND account_type.account_type_code <> 'CFCA'
+		GROUP BY client.client_id
+	) b 
+	ON b.client_id = a.client_id
+) 
+c ON client.client_id = c.client_id
+ORDER BY client.client_id;

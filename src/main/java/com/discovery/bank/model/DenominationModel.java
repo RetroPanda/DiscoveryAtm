@@ -1,19 +1,35 @@
 package com.discovery.bank.model;
 
 public class DenominationModel {
-	private int id;
-	private int count;
+	private int denominationId;
+	private int denominationValue;
+	private int numberOfNotesToDispense;
+	private int numberOfNotesLeft;
 	
-	public int getCount() {
-		return count;
+	public int getNumberOfNotesLeft() {
+		return numberOfNotesLeft;
 	}
-	public void setCount(int count) {
-		this.count = count;
+	public void setNumberOfNotesLeft(int numberOfNotesLeft) {
+		this.numberOfNotesLeft = numberOfNotesLeft;
 	}
-	public int getId() {
-		return id;
+	public int getDenominationValue() {
+		return denominationValue;
 	}
-	public void setId(int id) {
-		this.id = id;
+	public void setDenominationValue(int denominationValue) {
+		this.denominationValue = denominationValue;
 	}
+	
+	public int getDenominationId() {
+		return denominationId;
+	}
+	public void setDenominationId(int denominationId) {
+		this.denominationId = denominationId;
+	}
+	public int getNumberOfNotesToDispense() {
+		return numberOfNotesToDispense;
+	}
+	public void setNumberOfNotesToDispense(int numberOfNotesToDispense) {
+		this.numberOfNotesToDispense = numberOfNotesToDispense;
+	}
+	
 }

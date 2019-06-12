@@ -36,14 +36,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({ InsufficentFundsException.class })
     protected ResponseEntity<Object> handleInsufficientFunds(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, "Insufficient funds", 
+        return handleExceptionInternal(ex, "Insufficient funds. "+(ex.getMessage() != null ? ex.getMessage():""), 
           new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
     
     @ExceptionHandler({ RemainderException.class })
     protected ResponseEntity<Object> handleRemainder(
       Exception ex, WebRequest request) {
-        return handleExceptionInternal(ex, "Amount not available, would you like to draw "+ex.getMessage(), 
+        return handleExceptionInternal(ex, "Amount not available, would you like to draw "+ex.getMessage()+"?", 
           new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
     
