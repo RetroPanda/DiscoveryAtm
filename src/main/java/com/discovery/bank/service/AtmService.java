@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +14,6 @@ import com.discovery.bank.dto.AtmAllocation;
 import com.discovery.bank.dto.ClientAccount;
 import com.discovery.bank.dto.Currency;
 import com.discovery.bank.dto.CurrencyConversionRate;
-import com.discovery.bank.dto.Denomination;
 import com.discovery.bank.exception.AccountNotFoundException;
 import com.discovery.bank.exception.AtmNotFoundException;
 import com.discovery.bank.exception.InsufficentFundsException;
@@ -54,7 +51,9 @@ public class AtmService {
 		ClientAccount account = accRepository.findByClientAccountNumber(accNumber).get();
 	
 		BigDecimal balance = account.getDisplayBalance();
-		if(balance.subtract(BigDecimal.valueOf(amount)).intValue() < 0){
+		if(balance.subtract(BigDecimal.valueOf(amount)).intValue() < 0 && !account.getAccountTypeCode().equalsIgnoreCase("CHQ")){
+			throw new InsufficentFundsException();
+		}else if(balance.subtract(BigDecimal.valueOf(amount)).intValue() < -10000 && account.getAccountTypeCode().equalsIgnoreCase("CHQ")){
 			throw new InsufficentFundsException();
 		}
 		
